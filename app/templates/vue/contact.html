@@ -1,0 +1,66 @@
+{% load static %}
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<script src='https://unpkg.com/axios/dist/axios.min.js'></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+
+<script>
+    var app = new Vue({
+        el: '#contact',
+        data: {
+            email: "",
+            date: "",
+            urlRelais: "",
+            message: "",
+            is_submited: false,
+            base_url: "{% url 'postcontact' %}",
+        },
+        delimiters: ["${", "}"],
+        mounted() {
+        },
+        methods: {
+            send_contact: function () {
+                this.is_submited = true;
+                let formData = new FormData();
+                formData.append('email', this.email);
+                formData.append('date', this.date);
+                formData.append('message', this.message);
+                formData.append('urlRelais', this.urlRelais);
+                axios.defaults.xsrfCookieName = 'csrftoken';
+                axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+                axios.post("{% url 'postcontact' %}", formData, {})
+                    .then(response => {
+                        if (response.data.status) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: response.data.message,
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+                            this.is_submited = false;
+                            window.location.reload()
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: response.data.message,
+                                // timer: 2000
+                            });
+                            console.log(response.data)
+                            this.is_submited = false
+                        }
+                        console.log(response)
+                    })
+                    .catch((err) => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Une erreur est survenu veuillez reessayer',
+                            footer: "<a href>Les developpeurs s'excusent pour les desagrements?</a>",
+                            timer: 3000
+                        });
+                        this.is_submited = false
+                        console.log(err);
+                    });
+            },
+        },
+    })
+</script>
