@@ -19,47 +19,75 @@
         },
         methods: {
             send_contact: function () {
-                this.is_submited = true;
-                let formData = new FormData();
-                formData.append('email', this.email);
-                formData.append('date', this.date);
-                formData.append('message', this.message);
-                formData.append('urlRelais', this.urlRelais);
-                axios.defaults.xsrfCookieName = 'csrftoken';
-                axios.defaults.xsrfHeaderName = 'X-CSRFToken';
-                axios.post("{% url 'postcontact' %}", formData, {})
-                    .then(response => {
-                        if (response.data.status) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: response.data.message,
-                                showConfirmButton: false,
-                                timer: 1500
-                            });
-                            this.is_submited = false;
-                            window.location.reload()
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: response.data.message,
-                                // timer: 2000
-                            });
-                            console.log(response.data)
-                            this.is_submited = false
-                        }
-                        console.log(response)
-                    })
-                    .catch((err) => {
+                if (!this.is_submited) {
+                    if (!this.email) {
                         Swal.fire({
-                            icon: 'error',
-                            title: 'Oops...',
-                            text: 'Une erreur est survenu veuillez reessayer',
-                            footer: "<a href>Les developpeurs s'excusent pour les desagrements?</a>",
-                            timer: 3000
-                        });
-                        this.is_submited = false
-                        console.log(err);
-                    });
+                            icon: 'warning',
+                            html: '<h4>Veuillez remplir le champ Email</h4>',
+                        })
+                    }
+                    else if (!this.date) {
+                        Swal.fire({
+                            icon: 'warning',
+                            html: '<h4>Veuillez remplir le champ Date</h4>',
+                        })
+                    }
+                    else if (!this.urlRelais) {
+                        Swal.fire({
+                            icon: 'warning',
+                            html: '<h4>Veuillez saisir le lien de votre Github</h4>',
+                        })
+                    }
+                    else if (!this.message) {
+                        Swal.fire({
+                            icon: 'warning',
+                            html: '<h4>Veuillez remplir le champ Message</h4>',
+                        })
+                    }
+                    else {
+                        this.is_submited = true;
+                        let formData = new FormData();
+                        formData.append('email', this.email);
+                        formData.append('date', this.date);
+                        formData.append('message', this.message);
+                        formData.append('urlRelais', this.urlRelais);
+                        axios.defaults.xsrfCookieName = 'csrftoken';
+                        axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+                        axios.post("{% url 'postcontact' %}", formData, {})
+                            .then(response => {
+                                if (response.data.status) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: response.data.message,
+                                        showConfirmButton: false,
+                                        timer: 1500
+                                    });
+                                    this.is_submited = false;
+                                    window.location.reload()
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: response.data.message,
+                                        // timer: 2000
+                                    });
+                                    console.log(response.data)
+                                    this.is_submited = false
+                                }
+                                console.log(response)
+                            })
+                            .catch((err) => {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Oops...',
+                                    text: 'Une erreur est survenu veuillez reessayer',
+                                    footer: "<a href>Les developpeurs s'excusent pour les desagrements?</a>",
+                                    timer: 3000
+                                });
+                                this.is_submited = false
+                                console.log(err);
+                            });
+                    }
+                }
             },
         },
     })
